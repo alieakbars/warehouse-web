@@ -76,7 +76,6 @@ class PenitipanController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.customer',
             'w.nama as cabang_origin',
             'w1.nama as cabang_destination'
@@ -89,8 +88,7 @@ class PenitipanController extends BaseController
             'i.bulan',
             'i.no_urut',
             'i.kategori',
-            'i.model',
-            'i.nama'
+            'i.model'
         );
 
         $table = "penitipan i 
@@ -159,7 +157,6 @@ class PenitipanController extends BaseController
             $arr['no_urut'] = $each->no_urut;
             $arr['kategori'] = $each->kategori;
             $arr['model'] = $each->model;
-            $arr['nama'] = $each->nama;
             $arr['customer'] = $each->customer;
             $arr['cabang_origin'] = $each->cabang_origin;
             $arr['cabang_destination'] = $each->cabang_destination;
@@ -185,7 +182,6 @@ class PenitipanController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.customer',
             'w.nama as cabang_origin',
             'w1.nama as cabang_destination'
@@ -199,7 +195,6 @@ class PenitipanController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.customer'
 
         );
@@ -269,7 +264,6 @@ class PenitipanController extends BaseController
             $arr['no_urut'] = $each->no_urut;
             $arr['kategori'] = $each->kategori;
             $arr['model'] = $each->model;
-            $arr['nama'] = $each->nama;
             $arr['customer'] = $each->customer;
             $arr['cabang_origin'] = $each->cabang_origin;
             $arr['cabang_destination'] = $each->cabang_destination;
@@ -293,7 +287,6 @@ class PenitipanController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.cabang',
             'i.customer',
             'w.nama as cabang_origin',
@@ -329,8 +322,8 @@ class PenitipanController extends BaseController
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->mergeCells('B1:K1');
-        $sheet->mergeCells('B2:K2');
+        $sheet->mergeCells('B1:L1');
+        $sheet->mergeCells('B2:L2');
         $sheet->freezePane('A5');
         $sheet->getRowDimension(1);
 
@@ -382,7 +375,7 @@ class PenitipanController extends BaseController
             ]
         ];
 
-        $sheet->getStyle('A4:M4')->applyFromArray($style_header);
+        $sheet->getStyle('A4:L4')->applyFromArray($style_header);
         $sheet->getStyle('B1:B2')->applyFromArray($style_center);
 
         $sheet->getColumnDimension('A')->setAutoSize(true);
@@ -397,7 +390,6 @@ class PenitipanController extends BaseController
         $sheet->getColumnDimension('J')->setAutoSize(true);
         $sheet->getColumnDimension('K')->setAutoSize(true);
         $sheet->getColumnDimension('L')->setAutoSize(true);
-        $sheet->getColumnDimension('M')->setAutoSize(true);
 
         $sheet
             ->setCellValue('B1', 'REPORT PENITIPAN IN')
@@ -411,10 +403,9 @@ class PenitipanController extends BaseController
             ->setCellValue('G4', 'No Urut')
             ->setCellValue('H4', 'Kategori')
             ->setCellValue('I4', 'model')
-            ->setCellValue('J4', 'Barang')
-            ->setCellValue('K4', 'Customer')
-            ->setCellValue('L4', 'Warehouse Asal')
-            ->setCellValue('M4', 'Warehouse Tujuan');
+            ->setCellValue('J4', 'Customer')
+            ->setCellValue('K4', 'Warehouse Asal')
+            ->setCellValue('L4', 'Warehouse Tujuan');
 
 
         $column = 5;
@@ -431,11 +422,9 @@ class PenitipanController extends BaseController
                 ->setCellValue('G' . $column, $data->no_urut)
                 ->setCellValue('H' . $column, $data->kategori)
                 ->setCellValue('I' . $column, $data->model)
-                ->setCellValue('J' . $column, $data->nama)
-                ->setCellValue('K' . $column, $data->customer)
-                ->setCellValue('L' . $column, $data->nama)
-                ->setCellValue('M' . $column, $data->cabang_origin)
-                ->setCellValue('M' . $column, $data->cabang_destination);
+                ->setCellValue('J' . $column, $data->customer)
+                ->setCellValue('K' . $column, $data->cabang_origin)
+                ->setCellValue('L' . $column, $data->cabang_destination);
             $column++;
         }
         // tulis dalam format .xlsx
@@ -471,7 +460,6 @@ class PenitipanController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.customer',
             'w.nama as cabang_origin',
             'w1.nama as cabang_destination'
@@ -506,8 +494,8 @@ class PenitipanController extends BaseController
         //     return redirect()->back();
         // }
         $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B1:O1');
-        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B2:O2');
+        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B1:N1');
+        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B2:N2');
         $spreadsheet->getActiveSheet()->freezePane('A5');
         $spreadsheet->getActiveSheet()->getRowDimension(1);
 
@@ -561,7 +549,7 @@ class PenitipanController extends BaseController
             ]
         ];
 
-        $spreadsheet->getActiveSheet()->getStyle('A4:O4')->applyFromArray($style_header);
+        $spreadsheet->getActiveSheet()->getStyle('A4:N4')->applyFromArray($style_header);
         $spreadsheet->getActiveSheet()->getStyle('B1:B2')->applyFromArray($style_center);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
@@ -578,7 +566,6 @@ class PenitipanController extends BaseController
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
 
 
 
@@ -596,10 +583,9 @@ class PenitipanController extends BaseController
             ->setCellValue('I4', 'No Urut')
             ->setCellValue('J4', 'Kategori')
             ->setCellValue('K4', 'model')
-            ->setCellValue('L4', 'Barang')
-            ->setCellValue('M4', 'customer')
-            ->setCellValue('N4', 'Warehouse Asal')
-            ->setCellValue('O4', 'Warehouse Tujuan');
+            ->setCellValue('L4', 'customer')
+            ->setCellValue('M4', 'Warehouse Asal')
+            ->setCellValue('N4', 'Warehouse Tujuan');
 
         $column = 5;
         // tulis data mobil ke cell
@@ -617,10 +603,9 @@ class PenitipanController extends BaseController
                 ->setCellValue('I' . $column, $data->no_urut)
                 ->setCellValue('J' . $column, $data->kategori)
                 ->setCellValue('K' . $column, $data->model)
-                ->setCellValue('L' . $column, $data->nama)
+                ->setCellValue('L' . $column, $data->customer)
                 ->setCellValue('M' . $column, $data->cabang_origin)
-                ->setCellValue('N' . $column, $data->cabang_destination)
-                ->setCellValue('O' . $column, $data->nama_warehouse);
+                ->setCellValue('N' . $column, $data->cabang_destination);
             $column++;
         }
         // tulis dalam format .xlsx

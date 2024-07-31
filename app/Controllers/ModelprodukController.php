@@ -114,6 +114,13 @@ class ModelprodukController extends BaseController
                 throw new \Exception('Model sudah ada !');
             }
 
+            $query2 = $db->query("SELECT id from model_produk where kode = '$kode'");
+            $results1 = $query2->getResult();
+
+            if ($results1) {
+                throw new \Exception('Kode sudah ada !');
+            }
+
             $db->query("INSERT into model_produk (kategori,model,kode,status,created_at) VALUES ('$kategori','$model','$kode','$status',now())");
 
             $db->transCommit();
@@ -149,6 +156,13 @@ class ModelprodukController extends BaseController
 
             if ($results) {
                 throw new \Exception('Model produk sudah ada !');
+            }
+
+            $query2 = $db->query("SELECT id from model_produk where id != '$id' AND kode = '$kode'");
+            $results2 = $query2->getResult();
+
+            if ($results2) {
+                throw new \Exception('Kode produk sudah ada !');
             }
 
             $db->query("UPDATE model_produk set kategori = '$kategori', model = '$model', kode = '$kode', status = '$status' where id = '$id' ");

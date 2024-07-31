@@ -78,6 +78,13 @@
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="<?= base_url(); ?>/file/KDK_Warehouse.apk">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Download APK</span>
+                </a>
+            </li>
+
             <!-- Nav Item - Utilities Collapse Menu -->
             <!-- <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">

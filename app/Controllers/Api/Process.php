@@ -130,9 +130,8 @@ class Process extends BaseController
             $kategori = $this->request->getvar('kategori');
             $model = $this->request->getvar('model');
             $cabang = $this->request->getvar('cabang');
-            $nama = $this->request->getvar('nama_barang');
             $data = array();
-            array_push($data, $sn, $status, $date_in, $user_in, $tahun, $bulan, $no_urut, $kategori, $model, $cabang, $nama);
+            array_push($data, $sn, $status, $date_in, $user_in, $tahun, $bulan, $no_urut, $kategori, $model, $cabang);
 
             $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");
             $rows = $query->getResult();
@@ -145,8 +144,8 @@ class Process extends BaseController
                 throw new \Exception('Barcode sudah discan');
             }
 
-            $db->query("INSERT INTO inventory (sn,status,date_in,user_in,tahun,bulan,no_urut,kategori,model,nama,cabang) 
-            VALUES ('$sn','$status',now(),'$user_in','$tahun','$bulan','$no_urut','$kategori','$model','$nama','$cabang')");
+            $db->query("INSERT INTO inventory (sn,status,date_in,user_in,tahun,bulan,no_urut,kategori,model,cabang) 
+            VALUES ('$sn','$status',now(),'$user_in','$tahun','$bulan','$no_urut','$kategori','$model','$cabang')");
 
             $db->transCommit();
             echo json_encode([
@@ -188,8 +187,8 @@ class Process extends BaseController
                 $query2 = $db->query("SELECT * FROM inventory where sn ='$sn' AND status = '1'");
                 $check = $query2->getRow();
 
-                $db->query("INSERT INTO penitipan (sn,status,date_in,user_in,tahun,bulan,no_urut,kategori,model,nama,customer,cabang,cabang_move) 
-                VALUES ('$sn','$status',now(),'$user_out','$check->tahun','$check->bulan','$check->no_urut','$check->kategori','$check->model','$check->nama','$customer','$check->cabang','$cabang')");
+                $db->query("INSERT INTO penitipan (sn,status,date_in,user_in,tahun,bulan,no_urut,kategori,model,customer,cabang,cabang_move) 
+                VALUES ('$sn','$status',now(),'$user_out','$check->tahun','$check->bulan','$check->no_urut','$check->kategori','$check->model','$customer','$check->cabang','$cabang')");
             }
 
             $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");

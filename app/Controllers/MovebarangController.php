@@ -50,7 +50,8 @@ class MovebarangController extends BaseController
             'i.tahun',
             'i.bulan',
             'i.no_urut',
-            'i.nama',
+            'i.kategori',
+            'i.model',
             'w.nama as warehouse_lama',
             'wb.nama as warehouse_baru'
 
@@ -131,7 +132,8 @@ class MovebarangController extends BaseController
             $arr['tahun'] = $each->tahun;
             $arr['bulan'] = $each->bulan;
             $arr['no_urut'] = $each->no_urut;
-            $arr['nama'] = $each->nama;
+            $arr['kategori'] = $each->kategori;
+            $arr['model'] = $each->model;
             $arr['warehouse_lama'] = $each->warehouse_lama;
             $arr['warehouse_baru'] = $each->warehouse_baru;
             $output['data'][] = $arr;
@@ -140,49 +142,6 @@ class MovebarangController extends BaseController
         echo json_encode($output);
     }
 
-    public function updateuser()
-    {
-        $db = \Config\Database::connect();
-        $db->transBegin();
-
-        try {
-            $id = $this->request->getVar('id');
-            $username = $this->request->getVar('username');
-            $pw = $this->request->getVar('password');
-            $nama = $this->request->getVar('nama');
-            $no_pegawai = $this->request->getVar('no_pegawai');
-            $status = $this->request->getVar('status');
-            $level = $this->request->getVar('level');
-
-            $query1 = $db->query("SELECT id from user where id != '$id' AND username = '$username'");
-            $results = $query1->getResult();
-
-            if ($results) {
-                throw new \Exception('Username sudah ada !');
-            }
-
-            if ($pw != '') {
-                $password = password_hash($pw, PASSWORD_DEFAULT);
-                $db->query("UPDATE user set username = '$username', password = '$password', nama = '$nama', no_pegawai = '$no_pegawai', status = '$status', level = '$level' where id = '$id' ");
-            } else {
-                $db->query("UPDATE user set username = '$username', nama = '$nama', no_pegawai = '$no_pegawai', status = '$status', level = '$level' where id = '$id' ");
-            }
-
-            $db->transCommit();
-            echo json_encode([
-                "status_code" => '202',
-                "message" => "Berhasil diupdate",
-                "data" => null,
-            ]);
-        } catch (\Throwable $th) {
-            $db->transRollback();
-            echo json_encode([
-                "status_code" => '303',
-                "message" => $th->getMessage(),
-                "data" => $th,
-            ]);
-        }
-    }
     public function cetakexcelmove()
     {
         $spreadsheet = new Spreadsheet();
@@ -197,10 +156,10 @@ class MovebarangController extends BaseController
             'i.tahun',
             'i.bulan',
             'i.no_urut',
-            'i.nama',
+            'i.kategori',
+            'i.model',
             'w.nama as warehouse_lama',
             'wb.nama as warehouse_baru'
-
         );
 
         $table = "pindah_produk pp 
@@ -233,8 +192,8 @@ class MovebarangController extends BaseController
         //     return redirect()->back();
         // }
         $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B1:L1');
-        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B2:L2');
+        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B1:M1');
+        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B2:M2');
         $spreadsheet->getActiveSheet()->freezePane('A5');
         $spreadsheet->getActiveSheet()->getRowDimension(1);
 
@@ -288,7 +247,7 @@ class MovebarangController extends BaseController
             ]
         ];
 
-        $spreadsheet->getActiveSheet()->getStyle('A4:L4')->applyFromArray($style_header);
+        $spreadsheet->getActiveSheet()->getStyle('A4:M4')->applyFromArray($style_header);
         $spreadsheet->getActiveSheet()->getStyle('B1:B2')->applyFromArray($style_center);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
@@ -303,6 +262,7 @@ class MovebarangController extends BaseController
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
 
 
         $spreadsheet->setActiveSheetIndex(0)
@@ -317,9 +277,10 @@ class MovebarangController extends BaseController
             ->setCellValue('G4', 'Tahun')
             ->setCellValue('H4', 'Bulan')
             ->setCellValue('I4', 'No Urut')
-            ->setCellValue('J4', 'Barang')
-            ->setCellValue('K4', 'Warehouse Lama')
-            ->setCellValue('L4', 'Warehouse Baru');
+            ->setCellValue('J4', 'Kategori')
+            ->setCellValue('K4', 'Model')
+            ->setCellValue('L4', 'Warehouse Lama')
+            ->setCellValue('M4', 'Warehouse Baru');
 
         $column = 5;
         // tulis data mobil ke cell
@@ -335,9 +296,10 @@ class MovebarangController extends BaseController
                 ->setCellValue('G' . $column, $data->tahun)
                 ->setCellValue('H' . $column, $data->bulan)
                 ->setCellValue('I' . $column, $data->no_urut)
-                ->setCellValue('J' . $column, $data->nama)
-                ->setCellValue('K' . $column, $data->warehouse_lama)
-                ->setCellValue('L' . $column, $data->warehouse_baru);
+                ->setCellValue('J' . $column, $data->kategori)
+                ->setCellValue('K' . $column, $data->model)
+                ->setCellValue('L' . $column, $data->warehouse_lama)
+                ->setCellValue('M' . $column, $data->warehouse_baru);
 
             // $spreadsheet->getActiveSheet()->setCellValueExplicit('F' . $column, $data->mobile, PHPExcel_Cell_DataType::TYPE_STRING);
             // $spreadsheet->getActiveSheet()->setCellValueExplicit('G' . $column, $data->ongkir, PHPExcel_Cell_DataType::TYPE_STRING);

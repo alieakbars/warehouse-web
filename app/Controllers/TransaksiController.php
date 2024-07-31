@@ -76,7 +76,6 @@ class TransaksiController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.cabang',
             'w.nama as nama_warehouse'
         );
@@ -88,11 +87,11 @@ class TransaksiController extends BaseController
             'i.bulan',
             'i.no_urut',
             'i.kategori',
-            'i.model',
-            'i.nama'
+            'i.model'
         );
 
-        $table = "inventory i left join warehouse w on w.id=i.cabang";
+        $table = "inventory i 
+        left join warehouse w on w.id=i.cabang";
         $where = "Where 1=1 AND i.date_out is null";
 
         //=================== TEMPLATE DATATABLE ===================
@@ -156,7 +155,6 @@ class TransaksiController extends BaseController
             $arr['no_urut'] = $each->no_urut;
             $arr['kategori'] = $each->kategori;
             $arr['model'] = $each->model;
-            $arr['nama'] = $each->nama;
             $arr['nama_warehouse'] = $each->nama_warehouse;
             $output['data'][] = $arr;
         }
@@ -180,7 +178,6 @@ class TransaksiController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.customer',
             'w.nama as nama_warehouse'
         );
@@ -193,7 +190,6 @@ class TransaksiController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.customer'
 
         );
@@ -263,7 +259,6 @@ class TransaksiController extends BaseController
             $arr['no_urut'] = $each->no_urut;
             $arr['kategori'] = $each->kategori;
             $arr['model'] = $each->model;
-            $arr['nama'] = $each->nama;
             $arr['customer'] = $each->customer;
             $arr['nama_warehouse'] = $each->nama_warehouse;
             $output['data'][] = $arr;
@@ -313,14 +308,14 @@ class TransaksiController extends BaseController
             'i.tahun',
             'i.bulan',
             'i.no_urut',
-            'i.kategori',
-            'i.model',
-            'i.nama',
+            'mp.kategori',
+            'mp.model',
             'i.cabang',
             'w.nama as nama_warehouse'
         );
 
-        $table = "inventory i left join warehouse w on w.id=i.cabang";
+        $table = "inventory i 
+        left join warehouse w on w.id=i.cabang";
         $where = "Where 1=1 AND i.date_out is null";
 
         $orderby = ' order by i.id desc ';
@@ -347,8 +342,8 @@ class TransaksiController extends BaseController
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->mergeCells('B1:K1');
-        $sheet->mergeCells('B2:K2');
+        $sheet->mergeCells('B1:J1');
+        $sheet->mergeCells('B2:J2');
         $sheet->freezePane('A5');
         $sheet->getRowDimension(1);
 
@@ -402,7 +397,7 @@ class TransaksiController extends BaseController
             ]
         ];
 
-        $sheet->getStyle('A4:K4')->applyFromArray($style_header);
+        $sheet->getStyle('A4:J4')->applyFromArray($style_header);
         $sheet->getStyle('B1:B2')->applyFromArray($style_center);
 
         $sheet->getColumnDimension('A')->setAutoSize(true);
@@ -415,7 +410,6 @@ class TransaksiController extends BaseController
         $sheet->getColumnDimension('H')->setAutoSize(true);
         $sheet->getColumnDimension('I')->setAutoSize(true);
         $sheet->getColumnDimension('J')->setAutoSize(true);
-        $sheet->getColumnDimension('K')->setAutoSize(true);
 
         $sheet
             ->setCellValue('B1', 'REPORT BARANG IN')
@@ -429,8 +423,7 @@ class TransaksiController extends BaseController
             ->setCellValue('G4', 'No Urut')
             ->setCellValue('H4', 'Kategori')
             ->setCellValue('I4', 'model')
-            ->setCellValue('J4', 'Barang')
-            ->setCellValue('K4', 'Warehouse');
+            ->setCellValue('J4', 'Warehouse');
 
 
         $column = 5;
@@ -447,8 +440,7 @@ class TransaksiController extends BaseController
                 ->setCellValue('G' . $column, $data->no_urut)
                 ->setCellValue('H' . $column, $data->kategori)
                 ->setCellValue('I' . $column, $data->model)
-                ->setCellValue('J' . $column, $data->nama)
-                ->setCellValue('K' . $column, $data->nama_warehouse);
+                ->setCellValue('J' . $column, $data->nama_warehouse);
 
             // $spreadsheet->getActiveSheet()->setCellValueExplicit('F' . $column, $data->mobile, PHPExcel_Cell_DataType::TYPE_STRING);
             // $spreadsheet->getActiveSheet()->setCellValueExplicit('G' . $column, $data->ongkir, PHPExcel_Cell_DataType::TYPE_STRING);
@@ -490,12 +482,12 @@ class TransaksiController extends BaseController
             'i.no_urut',
             'i.kategori',
             'i.model',
-            'i.nama',
             'i.customer',
             'w.nama as nama_warehouse'
         );
 
-        $table = "inventory i left join warehouse w on w.id=i.cabang";
+        $table = "inventory i 
+        left join warehouse w on w.id=i.cabang";
         $where = "Where 1=1 AND i.date_out is not null";
 
         $orderby = ' order by i.id desc ';
@@ -521,8 +513,8 @@ class TransaksiController extends BaseController
         //     return redirect()->back();
         // }
         $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B1:N1');
-        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B2:N2');
+        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B1:M1');
+        $spreadsheet->setActiveSheetIndex(0)->mergeCells('B2:M2');
         $spreadsheet->getActiveSheet()->freezePane('A5');
         $spreadsheet->getActiveSheet()->getRowDimension(1);
 
@@ -576,7 +568,7 @@ class TransaksiController extends BaseController
             ]
         ];
 
-        $spreadsheet->getActiveSheet()->getStyle('A4:N4')->applyFromArray($style_header);
+        $spreadsheet->getActiveSheet()->getStyle('A4:M4')->applyFromArray($style_header);
         $spreadsheet->getActiveSheet()->getStyle('B1:B2')->applyFromArray($style_center);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
@@ -592,7 +584,6 @@ class TransaksiController extends BaseController
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
 
 
 
@@ -610,9 +601,8 @@ class TransaksiController extends BaseController
             ->setCellValue('I4', 'No Urut')
             ->setCellValue('J4', 'Kategori')
             ->setCellValue('K4', 'model')
-            ->setCellValue('L4', 'Barang')
-            ->setCellValue('M4', 'customer')
-            ->setCellValue('N4', 'Warehouse');
+            ->setCellValue('L4', 'customer')
+            ->setCellValue('M4', 'Warehouse');
 
         $column = 5;
         // tulis data mobil ke cell
@@ -630,9 +620,8 @@ class TransaksiController extends BaseController
                 ->setCellValue('I' . $column, $data->no_urut)
                 ->setCellValue('J' . $column, $data->kategori)
                 ->setCellValue('K' . $column, $data->model)
-                ->setCellValue('L' . $column, $data->nama)
-                ->setCellValue('M' . $column, $data->customer)
-                ->setCellValue('N' . $column, $data->nama_warehouse);
+                ->setCellValue('L' . $column, $data->customer)
+                ->setCellValue('M' . $column, $data->nama_warehouse);
 
             // $spreadsheet->getActiveSheet()->setCellValueExplicit('F' . $column, $data->mobile, PHPExcel_Cell_DataType::TYPE_STRING);
             // $spreadsheet->getActiveSheet()->setCellValueExplicit('G' . $column, $data->ongkir, PHPExcel_Cell_DataType::TYPE_STRING);

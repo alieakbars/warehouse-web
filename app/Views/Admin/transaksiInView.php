@@ -60,7 +60,6 @@
                                     <th>Urutan</th>
                                     <th>Kategori</th>
                                     <th>Model</th>
-                                    <th>Nama barang</th>
                                     <th>Warehouse</th>
                                 </tr>
                             </thead>
@@ -169,9 +168,6 @@
                 },
                 {
                     "data": "model"
-                },
-                {
-                    "data": "nama"
                 },
                 {
                     "data": "nama_warehouse"
