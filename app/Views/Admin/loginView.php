@@ -17,7 +17,7 @@
                         <div class="card-body p-5 text-center">
                             <img src="<?= base_url(); ?>/assets_adm/img/logo1.png" style="height: 170px; width: 170px;" />
                             <h3 class="mb-3 mt-3">Login</h3>
-                            <!-- <?= password_hash('admin2023', PASSWORD_DEFAULT) ?> -->
+                            <?= password_hash('admin2023', PASSWORD_DEFAULT) ?>
 
                             <div class="form-outline mb-4">
                                 <input type="text" id="typeEmailX-2" name="username" class="form-control form-control-lg" required />

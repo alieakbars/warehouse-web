@@ -175,6 +175,7 @@ class Process extends BaseController
             $customer = $this->request->getvar('customer');
             $penitipan = $this->request->getvar('penitipan');
             $cabang = $this->request->getvar('cabang');
+            $progress_id = $this->request->getvar('progress_id');
 
             $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1' AND date_out is not null");
             $rows1 = $query1->getResult();
@@ -191,16 +192,33 @@ class Process extends BaseController
                 VALUES ('$sn','$status',now(),'$user_out','$check->tahun','$check->bulan','$check->no_urut','$check->kategori','$check->model','$customer','$check->cabang','$cabang')");
             }
 
-            $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");
-            $rows = $query->getResult();
-            if ($rows) {
-                $db->query("UPDATE inventory SET date_out = now(), user_out = '$user_out', status = '$status' , customer = '$customer' WHERE sn = '$sn'");
-            } else {
-                throw new \Exception('Data tidak ada');
-            }
+            if ($status == 2) {
+                $tahun = $this->request->getvar('tahun');
+                $bulan = $this->request->getvar('bulan');
+                $no_urut = $this->request->getvar('no_urut');
+                $kategori = $this->request->getvar('kategori');
+                $model = $this->request->getvar('model');
 
-            if ($sn == '' || $sn == null) {
-                throw new \Exception('Serial number tidak ditemukan');
+                $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1' AND date_out is not null");
+                $rows1 = $query1->getResult();
+                if ($rows1) {
+                    throw new \Exception('Sudah scan out');
+                }
+
+                $db->query("INSERT INTO inventory (sn,status,date_in,date_out,user_in,user_out,tahun,bulan,no_urut,kategori,model,customer,cabang,progress_id) 
+            VALUES ('$sn','$status',now(),now(),'$user_out','$user_out','$tahun','$bulan','$no_urut','$kategori','$model','$customer','$cabang','$progress_id')");
+            } else {
+                $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");
+                $rows = $query->getResult();
+                if ($rows) {
+                    $db->query("UPDATE inventory SET date_out = now(), user_out = '$user_out', status = '$status' , customer = '$customer', progress_id = '$progress_id' WHERE sn = '$sn'");
+                } else {
+                    throw new \Exception('Data tidak ada');
+                }
+
+                if ($sn == '' || $sn == null) {
+                    throw new \Exception('Serial number tidak ditemukan');
+                }
             }
 
             $db->transCommit();
@@ -333,5 +351,118 @@ class Process extends BaseController
             "message" => $message,
             "data" => $json_response,
         ]);
+    }
+    public function getquantity()
+    {
+        $db = \Config\Database::connect();
+
+        $userId = $this->request->getGet('userId');
+
+        $query = $db->query("SELECT 
+                i.kategori,
+                COUNT(*) AS total
+            FROM 
+                inventory i
+            JOIN 
+                quantity_progress p ON i.progress_id = p.id
+            WHERE 
+                p.status = 'Active'
+                AND p.user_id = $userId
+                AND DATE(p.creation_date) = CURDATE()
+            GROUP BY 
+                i.kategori;");
+
+        $rowsLimit = $query->getResult();
+        $json_response = [];
+        $message = "";
+        $status = "";
+
+        if ($rowsLimit) {
+            $json_response = $rowsLimit;
+            $status = "200";
+            $message = "Data found";
+        } else {
+            $status = "400";
+            $message = "Data not found";
+        }
+        return json_encode([
+            "status_code" => $status,
+            "message" => $message,
+            "data" => $json_response,
+        ]);
+    }
+
+    public function finishscanout()
+    {
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        try {
+            $status = $this->request->getvar('status');
+
+
+            $query2 = $db->query("SELECT id FROM quantity_progress where status = 'Active' ORDER BY creation_date DESC LIMIT 1");
+            $check = $query2->getRow();
+
+            if (!$check) {
+                throw new \Exception('Data tidak ada');
+            }
+
+            $db->query("UPDATE quantity_progress SET status = 'Non-Active' WHERE status = 'Active'");
+
+            $db->transCommit();
+            echo json_encode([
+                "status_code" => '202',
+                "message" => "Berhasil Finish Scan Out",
+                "data" => null,
+            ]);
+        } catch (\Exception $th) {
+            $db->transRollback();
+            echo json_encode([
+                "status_code" => '303',
+                "message" => $th->getMessage(),
+                "data" => null,
+            ]);
+        }
+    }
+
+    public function createquantity()
+    {
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        try {
+            $quantity = $this->request->getvar('quantity');
+            $warehouse_id = $this->request->getvar('warehouse_id');
+            $user_id = $this->request->getvar('user_id');
+            $username = $this->request->getvar('username');
+
+            $data = [
+                'quantity'      => $quantity,
+                'progress'      => 0,
+                'warehouse_id'  => $warehouse_id,
+                'user_id'       => $user_id,
+                'username'      => $username,
+                'status'        => 'Active'
+            ];
+
+            $db->table('quantity_progress')->insert($data);
+            $insertId = $db->insertID();   // <= ID auto-increment yang baru
+
+
+            $db->transCommit();
+            echo json_encode([
+                "status_code" => '202',
+                "message" => "Berhasil Create Quantity",
+                "data" => ["progress_id" => $insertId],
+            ]);
+        } catch (\Exception $th) {
+            $db->transRollback();
+            echo json_encode([
+                "status_code" => '303',
+                "message" => $th->getMessage(),
+                "data" => null,
+            ]);
+        }
     }
 }
