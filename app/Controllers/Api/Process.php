@@ -206,7 +206,7 @@ class Process extends BaseController
                 }
 
                 $db->query("INSERT INTO inventory (sn,status,date_in,date_out,user_in,user_out,tahun,bulan,no_urut,kategori,model,customer,cabang,progress_id) 
-            VALUES ('$sn','$status',now(),now(),'$user_out','$user_out','$tahun','$bulan','$no_urut','$kategori','$model','$customer','$cabang','$progress_id')");
+            VALUES ('$sn','1',now(),now(),'$user_out','$user_out','$tahun','$bulan','$no_urut','$kategori','$model','$customer','$cabang','$progress_id')");
             } else {
                 $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");
                 $rows = $query->getResult();
