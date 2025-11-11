@@ -358,36 +358,56 @@ class Process extends BaseController
 
         $userId = $this->request->getGet('userId');
 
-        $query = $db->query("SELECT 
-                i.kategori,
-                COUNT(*) AS total
-            FROM 
-                inventory i
-            JOIN 
-                quantity_progress p ON i.progress_id = p.id
-            WHERE 
-                p.status = 'Active'
-                AND p.user_id = $userId
-                AND DATE(p.creation_date) = CURDATE()
-            GROUP BY 
-                i.kategori;");
+        $progressQuery = $db->query("SELECT 
+            id,
+            quantity
+        FROM 
+            quantity_progress
+        WHERE 
+            status = 'Active'
+            AND user_id = ?
+            AND DATE(creation_date) = CURDATE()
+        LIMIT 1", [$userId]);
 
-        $rowsLimit = $query->getResult();
+        $progressData = $progressQuery->getRow();
+
+        $inventoryQuery = $db->query("SELECT 
+            i.kategori,
+            COUNT(*) AS total
+        FROM 
+            inventory i
+        JOIN 
+            quantity_progress p ON i.progress_id = p.id
+        WHERE 
+            p.status = 'Active'
+            AND p.user_id = ?
+            AND DATE(p.creation_date) = CURDATE()
+        GROUP BY 
+            i.kategori", [$userId]);
+
+        $rowsLimit = $inventoryQuery->getResult();
         $json_response = [];
         $message = "";
         $status = "";
+        $quantity = "";
+        $progressId = "";
 
-        if ($rowsLimit) {
-            $json_response = $rowsLimit;
+        if ($progressData) {
+            $json_response = $rowsLimit ?: [];
             $status = "200";
-            $message = "Data found";
+            $message = $rowsLimit ? "Data found" : "Progress exists but no inventory yet";
+            $quantity = $progressData->quantity;
+            $progressId = $progressData->id;
         } else {
             $status = "400";
-            $message = "Data not found";
+            $message = "No active progress found for today";
         }
+
         return json_encode([
             "status_code" => $status,
             "message" => $message,
+            "quantity" => $quantity,
+            "id" => $progressId,
             "data" => $json_response,
         ]);
     }
@@ -398,28 +418,35 @@ class Process extends BaseController
         $db->transBegin();
 
         try {
-            $status = $this->request->getvar('status');
+            $id = $this->request->getPost('id');
 
-
-            $query2 = $db->query("SELECT id FROM quantity_progress where status = 'Active' ORDER BY creation_date DESC LIMIT 1");
-            $check = $query2->getRow();
-
-            if (!$check) {
-                throw new \Exception('Data tidak ada');
+            if (empty($id)) {
+                throw new \Exception('ID tidak boleh kosong');
             }
 
-            $db->query("UPDATE quantity_progress SET status = 'Non-Active' WHERE status = 'Active'");
+            $query = $db->query("SELECT id, status FROM quantity_progress WHERE id = ? AND status = 'Active'", [$id]);
+            $check = $query->getRow();
+
+            if (!$check) {
+                throw new \Exception('Data tidak ditemukan atau sudah Non-Active');
+            }
+
+            $db->query("UPDATE quantity_progress SET status = 'Non-Active' WHERE id = ? AND status = 'Active'", [$id]);
 
             $db->transCommit();
             echo json_encode([
-                "status_code" => '202',
+                "status_code" => '200',
                 "message" => "Berhasil Finish Scan Out",
-                "data" => null,
+                "data" => [
+                    "id" => $id,
+                    "previous_status" => "Active",
+                    "current_status" => "Non-Active"
+                ],
             ]);
         } catch (\Exception $th) {
             $db->transRollback();
             echo json_encode([
-                "status_code" => '303',
+                "status_code" => '400',
                 "message" => $th->getMessage(),
                 "data" => null,
             ]);
