@@ -63,6 +63,7 @@
                                     <th>Kategori</th>
                                     <th>Model</th>
                                     <th>Customer</th>
+                                    <th>Status</th>
                                     <th>Warehouse</th>
                                     <th>Action</th>
                                 </tr>
@@ -256,6 +257,9 @@
                 },
                 {
                     "data": "customer"
+                },
+                {
+                    "data": "status"
                 },
                 {
                     "data": "nama_warehouse"

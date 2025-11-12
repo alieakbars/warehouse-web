@@ -133,7 +133,7 @@ class Process extends BaseController
             $data = array();
             array_push($data, $sn, $status, $date_in, $user_in, $tahun, $bulan, $no_urut, $kategori, $model, $cabang);
 
-            $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");
+            $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '0'");
             $rows = $query->getResult();
 
             if ($sn == '' || $sn == null) {
@@ -175,9 +175,18 @@ class Process extends BaseController
             $customer = $this->request->getvar('customer');
             $penitipan = $this->request->getvar('penitipan');
             $cabang = $this->request->getvar('cabang');
+            $tahun  = $this->request->getvar('tahun');
+            $bulan  = $this->request->getvar('bulan');
+            $no_urut = $this->request->getvar('no_urut');
+            $kategori = $this->request->getvar('kategori');
+            $model = $this->request->getvar('model');
             $progress_id = $this->request->getvar('progress_id');
 
-            $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1' AND date_out is not null");
+            if ($sn == '' || $sn == null) {
+                throw new \Exception('Serial number tidak ditemukan');
+            }
+
+            $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");
             $rows1 = $query1->getResult();
 
             if ($rows1) {
@@ -185,11 +194,24 @@ class Process extends BaseController
             }
 
             if ($penitipan == 1) {
-                $query2 = $db->query("SELECT * FROM inventory where sn ='$sn' AND status = '1'");
-                $check = $query2->getRow();
-
-                $db->query("INSERT INTO penitipan (sn,status,date_in,user_in,tahun,bulan,no_urut,kategori,model,customer,cabang,cabang_move) 
-                VALUES ('$sn','$status',now(),'$user_out','$check->tahun','$check->bulan','$check->no_urut','$check->kategori','$check->model','$customer','$check->cabang','$cabang')");
+                $query2 = $db->query("SELECT * FROM penitipan WHERE sn ='$sn'");
+                $rows2 = $query2->getResult();
+                if ($rows2) {
+                    throw new \Exception('Sudah scan out penitipan');
+                }
+                if ($status == 1) {
+                    $query = $db->query("SELECT * FROM inventory WHERE sn ='$sn' AND status = '0'");
+                    $rows = $query->getRow();
+                    if ($rows) {
+                        $db->query("INSERT INTO penitipan (sn,status,date_in,user_in,tahun,bulan,no_urut,kategori,model,customer,cabang,cabang_move) 
+                    VALUES ('$sn','1',now(),'$user_out','$rows->tahun','$rows->bulan','$rows->no_urut','$rows->kategori','$rows->model','$customer','$rows->cabang','$cabang')");
+                    } else {
+                        throw new \Exception('Data tidak ada');
+                    }
+                } else {
+                    $db->query("INSERT INTO penitipan (sn,status,date_in,user_in,tahun,bulan,no_urut,kategori,model,customer,cabang,cabang_move) 
+                    VALUES ('$sn','1',now(),'$user_out','$tahun','$bulan','$no_urut','$kategori','$model','$customer','','$cabang')");
+                }
             }
 
             if ($status == 2) {
@@ -199,25 +221,21 @@ class Process extends BaseController
                 $kategori = $this->request->getvar('kategori');
                 $model = $this->request->getvar('model');
 
-                $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1' AND date_out is not null");
+                $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND (status = '1' OR status = '2')");
                 $rows1 = $query1->getResult();
                 if ($rows1) {
                     throw new \Exception('Sudah scan out');
                 }
 
                 $db->query("INSERT INTO inventory (sn,status,date_in,date_out,user_in,user_out,tahun,bulan,no_urut,kategori,model,customer,cabang,progress_id) 
-            VALUES ('$sn','1',now(),now(),'$user_out','$user_out','$tahun','$bulan','$no_urut','$kategori','$model','$customer','$cabang','$progress_id')");
+            VALUES ('$sn','2',now(),now(),'$user_out','$user_out','$tahun','$bulan','$no_urut','$kategori','$model','$customer','$cabang','$progress_id')");
             } else {
-                $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1'");
+                $query = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '0'");
                 $rows = $query->getResult();
                 if ($rows) {
-                    $db->query("UPDATE inventory SET date_out = now(), user_out = '$user_out', status = '$status' , customer = '$customer', progress_id = '$progress_id' WHERE sn = '$sn'");
+                    $db->query("UPDATE inventory SET date_out = now(), user_out = '$user_out', status = '1' , customer = '$customer', progress_id = '$progress_id' WHERE sn = '$sn'");
                 } else {
                     throw new \Exception('Data tidak ada');
-                }
-
-                if ($sn == '' || $sn == null) {
-                    throw new \Exception('Serial number tidak ditemukan');
                 }
             }
 
@@ -245,22 +263,21 @@ class Process extends BaseController
         try {
             $sn = $this->request->getvar('sn');
             $user = $this->request->getvar('user');
-            $status = $this->request->getvar('status');
             $cabang = $this->request->getvar('cabang');
 
-            $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '1' AND cabang = '$cabang'");
+            $query1 = $db->query("SELECT id FROM inventory WHERE sn ='$sn' AND status = '0' AND cabang = '$cabang'");
             $rows1 = $query1->getResult();
 
             if ($rows1) {
                 throw new \Exception('Tidak boleh pindah pada warehouse yang sama');
             }
 
-            $query = $db->query("SELECT id,cabang FROM inventory WHERE sn ='$sn' AND status = '1'");
+            $query = $db->query("SELECT id,cabang FROM inventory WHERE sn ='$sn' AND status = '0'");
             $rows = $query->getRow();
             if ($rows) {
                 $db->query("INSERT INTO pindah_produk (sn,date_move,cabang_old,cabang_move,user_move) 
                 VALUES ('$sn',now(),'$rows->cabang','$cabang','$user')");
-                $db->query("UPDATE inventory SET cabang = '$cabang', status = '$status' WHERE sn = '$sn'");
+                $db->query("UPDATE inventory SET cabang = '$cabang' WHERE sn = '$sn'");
             } else {
                 throw new \Exception('Data tidak ada');
             }
@@ -304,7 +321,7 @@ class Process extends BaseController
             $query = $db->query("SELECT id FROM penitipan WHERE sn ='$sn' AND status = '1'");
             $rows = $query->getResult();
             if ($rows) {
-                $db->query("UPDATE penitipan SET date_out = now(), user_out = '$user_out', status = '$status' WHERE sn = '$sn'");
+                $db->query("UPDATE penitipan SET date_out = now(), user_out = '$user_out', status = '1' WHERE sn = '$sn'");
             } else {
                 throw new \Exception('Data tidak ada');
             }
@@ -322,7 +339,7 @@ class Process extends BaseController
         } catch (\Exception $th) {
             $db->transRollback();
             echo json_encode([
-                "status_code" => '303',
+                "status_code" => '303', 
                 "message" => $th->getMessage(),
                 "data" => null,
             ]);
@@ -372,7 +389,7 @@ class Process extends BaseController
         $progressData = $progressQuery->getRow();
 
         $inventoryQuery = $db->query("SELECT 
-            i.kategori,
+            i.model,
             COUNT(*) AS total
         FROM 
             inventory i
@@ -383,7 +400,7 @@ class Process extends BaseController
             AND p.user_id = ?
             AND DATE(p.creation_date) = CURDATE()
         GROUP BY 
-            i.kategori", [$userId]);
+            i.model", [$userId]);
 
         $rowsLimit = $inventoryQuery->getResult();
         $json_response = [];
